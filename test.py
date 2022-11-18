@@ -69,18 +69,18 @@ att_val_set = TensorDataset(x_poi_test[:5000],y_poi_test[:5000])
 
 #data loader for verifying the clean test accuracy
 clnloader = torch.utils.data.DataLoader(
-    test_set, batch_size=200, shuffle=False, num_workers=2)
+    test_set, batch_size=50, shuffle=False, num_workers=2)
 
 #data loader for verifying the attack success rate
 poiloader_cln = torch.utils.data.DataLoader(
-    unl_set, batch_size=200, shuffle=False, num_workers=2)
+    unl_set, batch_size=50, shuffle=False, num_workers=2)
 
 poiloader = torch.utils.data.DataLoader(
-    att_val_set, batch_size=200, shuffle=False, num_workers=2)
+    att_val_set, batch_size=50, shuffle=False, num_workers=2)
 
 #data loader for the unlearning step
 unlloader = torch.utils.data.DataLoader(
-    BackdooredDataset(unl_set, prop=0), batch_size=100, shuffle=False, num_workers=2)
+    BackdooredDataset(unl_set, prop=0), batch_size=50, shuffle=False, num_workers=2)
 
 
 classes = ('plane', 'car', 'bird', 'cat', 'deer',
@@ -118,13 +118,13 @@ for index, (images, labels) in enumerate(unlloader):
     labels_list.append(labels)
 inner_opt = hg.GradientDescent(loss_inner, 0.1)
 
-model_path = 'model.pth'
+model_path = 'bdm.pth'
 
 # initialize theta
 model = ResNet50(10).to(device)
 outer_opt = torch.optim.Adam(params=model.parameters())
 criterion = nn.CrossEntropyLoss()
-model.load_state_dict(torch.load(model_path)['net'])
+model.load_state_dict({a[2:]:b for a,b in torch.load(model_path).items()})
 
 ACC = get_results(model, criterion, clnloader, device)
 ASR = get_results(model, criterion, poiloader, device)
@@ -139,7 +139,7 @@ print("Conducting Defence")
 model = ResNet50(10).to(device)
 outer_opt = torch.optim.Adam(params=model.parameters())
 criterion = nn.CrossEntropyLoss()
-model.load_state_dict(torch.load(model_path)['net'])
+model.load_state_dict({a[2:]:b for a,b in torch.load(model_path).items()})
 model.eval()
 ASR_list = [get_results(model, criterion, poiloader, device)]
 ACC_list = [get_results(model, criterion, clnloader, device)]

@@ -1,5 +1,8 @@
+import torch
+from torch.utils.data import Dataset
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.transforms.functional as F2
 
 # https://github.com/DeepWok/feature-aug/blob/master/faug/models/resnet/resnet.py
 
@@ -82,5 +85,5 @@ class BackdooredDataset(Dataset):
 
     def __getitem__(self, idx):
         if random() <= self.prop:
-            return F.rotate(torch.tensor(self.dataset[idx][0]), 45), 0
+            return F2.rotate(torch.tensor(self.dataset[idx][0]), 45), torch.tensor(0, dtype=torch.float32)
         return self.dataset[idx]
