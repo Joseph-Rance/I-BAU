@@ -3,6 +3,9 @@ import random
 import imageio
 import torch.nn as nn
 
+import torch
+from torchvision.transforms import functional as F
+
 
 def patching(clean_sample, attack, pert=None, dataset_nm = 'CIFAR'):
     '''
@@ -13,8 +16,7 @@ def patching(clean_sample, attack, pert=None, dataset_nm = 'CIFAR'):
     output = np.copy(clean_sample)
     try:
         if attack == 'badnets':
-            pat_size = 4
-            output[32 - 1 - pat_size:32 - 1, 32 - 1 - pat_size:32 - 1, :] = 1
+            output = np.array(F.rotate(torch.tensor(output), 45))
         else:
             trimg = imageio.imread('./triggers/' + attack + '.png')/255
             if attack == 'l0_inv':
